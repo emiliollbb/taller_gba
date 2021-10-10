@@ -4,15 +4,28 @@
 #include "sprites.gfx.h"
 
 struct game_s {
-    int objects;
+    // Buffer con los metadatos de los sprites
+    OBJ_ATTR obj_buffer[128];
+    // Tamano del buffer de metadatos de sprites
+    int obj_buffer_size;
+    // Contador de frames
     u32 frame;
+    
+    /* LOGICA DE JUEGO */
+    int posx;
+    int posy;
 };
 struct game_s game;
-OBJ_ATTR obj_buffer[128];
+
 
 void init_game() {
-    game.objects=0;
-    game.frame=0;    
+    game.obj_buffer_size=0;
+    game.frame=0;
+    
+    // Inicializar logica de juego
+    game.posx=96;
+    game.posy=100;
+    
 }
 
 void load_background() {
@@ -34,27 +47,30 @@ void load_background() {
 
 void load_sprites() {
     // Inicializar buffer sprites
-	oam_init(obj_buffer, 128);
+	oam_init(game.obj_buffer, 128);
     // Cargar paleta sprites
 	memcpy(pal_obj_mem, sprites_gfxPal, sprites_gfxPalLen);
     // Cargar tiles sprites en CBB 4
 	memcpy(&tile_mem[4][0], sprites_gfxTiles, sprites_gfxTilesLen);
     
     // Cargar mapa sprite 0
-    obj_set_attr(&obj_buffer[0], 
+    obj_set_attr(&game.obj_buffer[game.obj_buffer_size++], 
 			ATTR0_SQUARE,
-			ATTR1_SIZE_32,
-			ATTR2_PALBANK(0) | ATTR2_PRIO(0) | 0);
+			ATTR1_SIZE_32x32,
+			ATTR2_PALBANK(0) | ATTR2_PRIO(0) | 0);    
+}
+
+void update_sprites() {
     // Establecer posicion sprite 0
-    obj_set_pos(&obj_buffer[0], 96, 100);
+    obj_set_pos(&game.obj_buffer[0], game.posx, game.posy);
     // Copiar buffer to sprites memory
-    oam_copy(oam_mem, obj_buffer, 1);
+    oam_copy(oam_mem, game.obj_buffer, game.obj_buffer_size);
 }
 
 void update_game() {
 }
 
-void init_video() {
+void init_display() {
     // Init Display
     REG_DISPCNT= DCNT_MODE0 
                 | DCNT_BG0 
@@ -68,16 +84,17 @@ int main()
 	irq_init(NULL);
 	// Activar interrupción VBlank
     irq_add(II_VBLANK, NULL);
+    
+    // Inicializar datos    
+	init_game();
 	
 	// Cargar fondo	
 	load_background();
 	// Cargar sprites
 	load_sprites();
     // Inicializar video
-    init_video();
-	
-    // Inicializar datos    
-	init_game();
+    init_display();
+	    
 	
 	while(1)
 	{
@@ -87,8 +104,10 @@ int main()
 		game.frame++;
         // Leer botones
 		key_poll();
-        // Actualizar juego
+        // Actualizar datos juego
 		update_game();
+        // Actualizar sprites
+        update_sprites();
 	}
 
 	return 0;
