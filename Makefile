@@ -10,12 +10,19 @@ background.gfx.h : background.gfx.c
 
 background.gfx.o : background.gfx.c background.gfx.h
 	arm-none-eabi-gcc -I${INCLUDE} -O2 -Wall -fno-strict-aliasing -mthumb-interwork -mthumb -c background.gfx.c -o background.gfx.o
+	
+sprites.gfx.c sprites.gfx.h : sprites.gfx.png
+	grit sprites.gfx.png -gu16 -gB4 -Mw 4 -Mh 4 -ftc
+sprites.gfx.h : sprites.gfx.c
 
-main.o : main.c background.gfx.h
+sprites.gfx.o : sprites.gfx.c sprites.gfx.h
+	arm-none-eabi-gcc -I${INCLUDE} -O2 -Wall -fno-strict-aliasing -mthumb-interwork -mthumb -c sprites.gfx.c -o sprites.gfx.o
+
+main.o : main.c background.gfx.h sprites.gfx.h
 	arm-none-eabi-gcc ${INCLUDE} -O2 -Wall -fno-strict-aliasing -mthumb-interwork -mthumb -c main.c -o main.o
 
-juego.elf : main.o background.gfx.o
-	arm-none-eabi-gcc main.o background.gfx.o -mthumb-interwork -mthumb -specs=gba.specs ${LIBPATHS} -ltonc -o juego.elf
+juego.elf : main.o background.gfx.o sprites.gfx.o
+	arm-none-eabi-gcc main.o background.gfx.o sprites.gfx.o -mthumb-interwork -mthumb -specs=gba.specs ${LIBPATHS} -ltonc -o juego.elf
 
 juego.gba : juego.elf
 	arm-none-eabi-objcopy -v -O binary juego.elf juego.gba
