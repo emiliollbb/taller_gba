@@ -6,6 +6,9 @@
 *.ko
 *.obj
 *.elf
+*.gfx.h
+*.gfx.c
+*.gba
 
 # Linker output
 *.ilk
