@@ -3,6 +3,7 @@
 #include "background.gfx.h"
 #include "sprites.gfx.h"
 
+// Definir estructura para guardar los datos del juego
 struct game_s {
     // Buffer con los metadatos de los sprites
     OBJ_ATTR obj_buffer[128];
@@ -12,22 +13,32 @@ struct game_s {
     u32 frame;
     
     /* LOGICA DE JUEGO */
+    // Posicion x jugador
     int posx;
+    // Posicion y jugador
     int posy;
 };
+// Instanciar en memoria la estructura con los datos del juego
 struct game_s game;
 
-
+// Inicializar datos juego
 void init_game() {
+	// Inicializar buffer sprites
+	oam_init(game.obj_buffer, 128);
+	// Inicializar contador tamano buffer sprites
     game.obj_buffer_size=0;
+    // Inicializar contador de frames
     game.frame=0;
     
-    // Inicializar logica de juego
+    /* Inicializar logica de juego */
+    // Inicializar posicion x jugador
     game.posx=96;
+    // Inicializar posicion y jugador
     game.posy=100;
     
 }
 
+// Cargar fondo
 void load_background() {
     // Cargar paleta fondo
 	memcpy(pal_bg_mem, background_gfxPal, background_gfxPalLen);
@@ -45,9 +56,8 @@ void load_background() {
 	REG_BG0VOFS= 0;
 }
 
+// Cargar sprites
 void load_sprites() {
-    // Inicializar buffer sprites
-	oam_init(game.obj_buffer, 128);
     // Cargar paleta sprites
 	memcpy(pal_obj_mem, sprites_gfxPal, sprites_gfxPalLen);
     // Cargar tiles sprites en CBB 4
@@ -60,6 +70,7 @@ void load_sprites() {
 			ATTR2_PALBANK(0) | ATTR2_PRIO(0) | 0);    
 }
 
+// Actualizar y mostar sprites en pantalla
 void update_sprites() {
     // Establecer posicion sprite 0
     obj_set_pos(&game.obj_buffer[0], game.posx, game.posy);
@@ -67,6 +78,7 @@ void update_sprites() {
     oam_copy(oam_mem, game.obj_buffer, game.obj_buffer_size);
 }
 
+// Actualizar datos juego
 void update_game() {
     // Mover eje horizontal
     game.posx += 2*key_tri_horz();
@@ -82,11 +94,13 @@ void update_game() {
     }
 }
 
+// Inicializar sistema grafico
 void init_display() {
     // Init Display
     REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
 }
 
+// Metodo main. Inicio del programa
 int main()
 {
 	// Inicializar interrupciones
@@ -104,10 +118,11 @@ int main()
     // Inicializar video
     init_display();
 	    
-	
+	// Bucle infinito. No tenemos sistema operativo al que volver
 	while(1)
 	{
-		// Sincronizar con VBlank
+		// Sincronizar con VBlank mediante interrupcion.
+		// Esto se hace para evitar modificar la memoria a mitad de un refresco de pantalla.
         VBlankIntrWait();
         // Actualizar contador de frames
 		game.frame++;
@@ -119,5 +134,6 @@ int main()
         update_sprites();
 	}
 
+	// Nunca llegaremos a este punto. Sólo por cumplir con estandar c
 	return 0;
 }
