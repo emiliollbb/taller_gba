@@ -13,6 +13,8 @@ struct game_s {
     u32 frame;
     
     /* LOGICA DE JUEGO */
+    // Velocidad x jugador
+    int vx;
     // Posicion x jugador
     int posx;
     // Posicion y jugador
@@ -23,14 +25,16 @@ struct game_s game;
 
 // Inicializar datos juego
 void init_game() {
-    // Inicializar buffer sprites
-    oam_init(game.obj_buffer, 128);
-    // Inicializar contador tamano buffer sprites
+// Inicializar buffer sprites
+oam_init(game.obj_buffer, 128);
+// Inicializar contador tamano buffer sprites
     game.obj_buffer_size=0;
     // Inicializar contador de frames
     game.frame=0;
     
     /* Inicializar logica de juego */
+    // Inicializar velocidad x jugador
+    game.vx=0;
     // Inicializar posicion x jugador
     game.posx=96;
     // Inicializar posicion y jugador
@@ -74,6 +78,23 @@ void load_sprites() {
 void update_sprites() {
     // Establecer posicion sprite 0
     obj_set_pos(&game.obj_buffer[0], game.posx, game.posy);
+    // Animacion sprite 0
+    // Si la velocidad es 0, mostramos el primer sprite
+    if(game.vx==0) {
+        game.obj_buffer[0].attr2=ATTR2_BUILD(
+            // Tile de inicio, Paleta, Prioridad
+            0, 0, 0);
+    }
+    // Si la velocidad es distinta de 0, generamos animacion rotando
+    // los primeros 5 sprites
+    else {
+        game.obj_buffer[0].attr2=ATTR2_BUILD(
+            // Tile de inicio.
+            // Calculo tile de inicio: 5 sprites de 16 tiles
+            game.frame%5*16,
+            // Paleta y prioridad
+            0, 0);
+    }
     // Copiar buffer to sprites memory
     oam_copy(oam_mem, game.obj_buffer, game.obj_buffer_size);
 }
@@ -81,17 +102,8 @@ void update_sprites() {
 // Actualizar datos juego
 void update_game() {
     // Mover eje horizontal
-    game.posx += 2*key_tri_horz();
-    // Mover eje vertical
-    game.posy += 2*key_tri_vert();
-    
-    // Control botones
-    if(key_hit(KEY_A)) {
-        game.posx -= 10;
-    }
-    if(key_hit(KEY_B)) {
-        game.posx += 10;
-    }
+    game.vx = 2*key_tri_horz();
+    game.posx+=game.vx;    
 }
 
 // Inicializar sistema grafico
