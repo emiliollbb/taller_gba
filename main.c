@@ -95,6 +95,13 @@ void update_sprites() {
             // Paleta y prioridad
             0, 0);
     }
+    // Rotacion
+    if(game.vx>0) {
+        game.obj_buffer[0].attr1 |= ATTR1_HFLIP;
+    }
+    else if(game.vx<0) {
+        game.obj_buffer[0].attr1 &= ~ATTR1_HFLIP;        
+    }
     // Copiar buffer to sprites memory
     oam_copy(oam_mem, game.obj_buffer, game.obj_buffer_size);
 }
