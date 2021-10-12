@@ -13,22 +13,28 @@ struct game_s {
     u32 frame;
     
     /* LOGICA DE JUEGO */
-    
+    // Posicion x jugador
+    int posx;
+    // Posicion y jugador
+    int posy;
 };
 // Instanciar en memoria la estructura con los datos del juego
 struct game_s game;
 
 // Inicializar datos juego
 void init_game() {
-	// Inicializar buffer sprites
-	oam_init(game.obj_buffer, 128);
-	// Inicializar contador tamano buffer sprites
+    // Inicializar buffer sprites
+    oam_init(game.obj_buffer, 128);
+    // Inicializar contador tamano buffer sprites
     game.obj_buffer_size=0;
     // Inicializar contador de frames
     game.frame=0;
     
     /* Inicializar logica de juego */
-    
+    // Inicializar posicion x jugador
+    game.posx=96;
+    // Inicializar posicion y jugador
+    game.posy=100;
     
 }
 
@@ -52,12 +58,22 @@ void load_background() {
 
 // Cargar sprites
 void load_sprites() {
+    // Cargar paleta sprites
+    memcpy(pal_obj_mem, sprites_gfxPal, sprites_gfxPalLen);
+    // Cargar tiles sprites en CBB 4
+    memcpy(&tile_mem[4][0], sprites_gfxTiles, sprites_gfxTilesLen);
     
+    // Cargar mapa sprite 0
+    obj_set_attr(&game.obj_buffer[game.obj_buffer_size++], 
+    ATTR0_SQUARE,
+    ATTR1_SIZE_32x32,
+    ATTR2_PALBANK(0) | ATTR2_PRIO(0) | 0);    
 }
 
 // Actualizar y mostar sprites en pantalla
 void update_sprites() {
-    
+    // Establecer posicion sprite 0
+    obj_set_pos(&game.obj_buffer[0], game.posx, game.posy);
     // Copiar buffer to sprites memory
     oam_copy(oam_mem, game.obj_buffer, game.obj_buffer_size);
 }
@@ -70,7 +86,7 @@ void update_game() {
 // Inicializar sistema grafico
 void init_display() {
     // Init Display
-    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0;
+    REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
 }
 
 // Metodo main. Inicio del programa
