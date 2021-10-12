@@ -80,7 +80,18 @@ void update_sprites() {
 
 // Actualizar datos juego
 void update_game() {
+    // Mover eje horizontal
+    game.posx += 2*key_tri_horz();
+    // Mover eje vertical
+    game.posy += 2*key_tri_vert();
     
+    // Control botones
+    if(key_hit(KEY_A)) {
+        game.posx -= 10;
+    }
+    if(key_hit(KEY_B)) {
+        game.posx += 10;
+    }
 }
 
 // Inicializar sistema grafico
